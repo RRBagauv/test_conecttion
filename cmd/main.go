@@ -63,7 +63,9 @@ func main() {
     }
   ],
   "log": {
-    "loglevel": "warning"
+    "loglevel": "debug",
+	"access": "access.log",
+	"error": "error.log"
   },
   "outbounds": [
     {
@@ -159,12 +161,17 @@ func main() {
   "stats": {}
 }`
 
-	var config, err = serial.LoadJSONConfig(bytes.NewReader([]byte(configJson)))
+	var config, err = serial.DecodeJSONConfig(bytes.NewReader([]byte(configJson)))
 	if err != nil {
 		log.Fatal("Ошибка при загрузке конфигурации:", err.Error())
 	}
+	newConf, err := config.Build()
 
-	instance, err := core.New(config)
+	if err != nil {
+		log.Fatal(1234)
+	}
+
+	instance, err := core.New(newConf)
 	if err != nil {
 		log.Fatal("Ошибка при создании инстанса Core:", err)
 	}
