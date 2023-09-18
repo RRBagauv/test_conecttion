@@ -2,10 +2,28 @@ package main
 
 import (
 	"bytes"
+	"context"
+	"fmt"
+	_ "github.com/xtls/xray-core/app/proxyman/inbound"
+	_ "github.com/xtls/xray-core/app/proxyman/outbound"
+	net2 "github.com/xtls/xray-core/common/net"
 	"github.com/xtls/xray-core/core"
 	"github.com/xtls/xray-core/infra/conf/serial"
+	"github.com/xtls/xray-core/testing/servers/udp"
+	"io"
 	"log"
+	"net"
+	"net/http"
+	"time"
 )
+
+func xor(b []byte) []byte {
+	r := make([]byte, len(b))
+	for i, v := range b {
+		r[i] = v ^ 'c'
+	}
+	return r
+}
 
 func main() {
 	configJson := `{
@@ -181,4 +199,59 @@ func main() {
 	if err := instance.Start(); err != nil {
 		log.Fatal("Ошибка при запуске Core:", err)
 	}
+
+	udpServer1 := udp.Server{
+		MsgProcessor: xor,
+	}
+	data, err := udpServer1.Start()
+	fmt.Println(1234)
+	if err != nil {
+		log.Fatal("1123" + err.Error())
+	}
+	fmt.Println(1234)
+
+	if err != nil {
+		log.Fatal("asdf" + err.Error())
+	}
+	fmt.Println(1234)
+
+	httpClient := http.Client{
+		Transport: &http.Transport{
+			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+
+				dial, err := core.Dial(context.Background(), instance, net2.Destination{
+					Address: net2.Address(
+						Domai),
+				})
+				if err != nil {
+
+				}
+				return dial, err
+			},
+		},
+		Timeout: 50 * time.Second,
+	}
+
+	fmt.Println(1234)
+
+	res, err := httpClient.Get("https://api.myip.com")
+	fmt.Println(1234)
+
+	if err != nil {
+		fmt.Println(err.Error())
+
+		err := instance.Close()
+		if err != nil {
+			return
+		}
+		log.Fatal(err)
+	}
+
+	defer func(Body io.ReadCloser) {
+		_ = Body.Close()
+	}(res.Body)
+
+	body, _ := io.ReadAll(res.Body)
+	log.Fatal(string(body))
+
 }
