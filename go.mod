@@ -2,6 +2,8 @@ module v2ray
 
 go 1.21
 
+require github.com/xtls/xray-core v1.8.4
+
 require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/dgryski/go-metro v0.0.0-20211217172704-adc40b04c140 // indirect
@@ -29,7 +31,6 @@ require (
 	github.com/seiflotfy/cuckoofilter v0.0.0-20220411075957-e3b120b3f5fb // indirect
 	github.com/v2fly/ss-bloomring v0.0.0-20210312155135-28617310f63e // indirect
 	github.com/xtls/reality v0.0.0-20230828171259-e426190d57f6 // indirect
-	github.com/xtls/xray-core v1.8.4 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go4.org/netipx v0.0.0-20230824141953-6213f710f925 // indirect
 	golang.org/x/crypto v0.12.0 // indirect

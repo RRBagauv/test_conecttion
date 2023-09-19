@@ -9,21 +9,12 @@ import (
 	net2 "github.com/xtls/xray-core/common/net"
 	"github.com/xtls/xray-core/core"
 	"github.com/xtls/xray-core/infra/conf/serial"
-	"github.com/xtls/xray-core/testing/servers/udp"
 	"io"
 	"log"
 	"net"
 	"net/http"
 	"time"
 )
-
-func xor(b []byte) []byte {
-	r := make([]byte, len(b))
-	for i, v := range b {
-		r[i] = v ^ 'c'
-	}
-	return r
-}
 
 func main() {
 	configJson := `{
@@ -186,7 +177,7 @@ func main() {
 	newConf, err := config.Build()
 
 	if err != nil {
-		log.Fatal(1234)
+		log.Fatal(err)
 	}
 
 	instance, err := core.New(newConf)
@@ -194,48 +185,31 @@ func main() {
 		log.Fatal("Ошибка при создании инстанса Core:", err)
 	}
 
-	//proxyman.InboundConfig{}
-
 	if err := instance.Start(); err != nil {
 		log.Fatal("Ошибка при запуске Core:", err)
 	}
 
-	udpServer1 := udp.Server{
-		MsgProcessor: xor,
-	}
-	data, err := udpServer1.Start()
-	fmt.Println(1234)
-	if err != nil {
-		log.Fatal("1123" + err.Error())
-	}
-	fmt.Println(1234)
+	addr2, err := net2.ParseDestination("tcp:cp.cloudflare.com:80")
 
 	if err != nil {
-		log.Fatal("asdf" + err.Error())
+		log.Fatal(err)
 	}
-	fmt.Println(1234)
 
 	httpClient := http.Client{
 		Transport: &http.Transport{
 			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
 
-				dial, err := core.Dial(context.Background(), instance, net2.Destination{
-					Address: net2.Address(
-						Domai),
-				})
+				dial, err := core.Dial(context.Background(), instance, addr2)
 				if err != nil {
 
 				}
 				return dial, err
 			},
 		},
-		Timeout: 50 * time.Second,
+		Timeout: 5 * time.Second,
 	}
 
-	fmt.Println(1234)
-
-	res, err := httpClient.Get("https://api.myip.com")
-	fmt.Println(1234)
+	res, err := httpClient.Get("http://api.myip.com")
 
 	if err != nil {
 		fmt.Println(err.Error())
