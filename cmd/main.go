@@ -1,22 +1,25 @@
 package main
 
+import "C"
 import (
-	"bytes"
-	"context"
 	"fmt"
-	_ "github.com/xtls/xray-core/app/proxyman/inbound"
-	_ "github.com/xtls/xray-core/app/proxyman/outbound"
 	net2 "github.com/xtls/xray-core/common/net"
 	"github.com/xtls/xray-core/core"
 	"github.com/xtls/xray-core/infra/conf/serial"
 	"io"
 	"log"
-	"net"
 	"net/http"
-	"time"
 )
 
-func main() {
+import (
+	"bytes"
+	"context"
+	_ "github.com/xtls/xray-core/app/proxyman/inbound"
+	_ "github.com/xtls/xray-core/app/proxyman/outbound"
+)
+
+//export connect
+func connect() {
 	configJson := `{
   "dns": {
     "disableFallback": true,
@@ -195,21 +198,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	httpClient := http.Client{
-		Transport: &http.Transport{
-			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+	_, _ = core.Dial(context.Background(), instance, addr2)
 
-				dial, err := core.Dial(context.Background(), instance, addr2)
-				if err != nil {
-
-				}
-				return dial, err
-			},
-		},
-		Timeout: 5 * time.Second,
-	}
-
-	res, err := httpClient.Get("http://api.myip.com")
+	res, err := http.Get("http://api.myip.com")
 
 	if err != nil {
 		fmt.Println(err.Error())
