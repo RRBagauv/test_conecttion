@@ -2,13 +2,14 @@ package main
 
 import "C"
 import (
-	"fmt"
 	net2 "github.com/xtls/xray-core/common/net"
 	"github.com/xtls/xray-core/core"
 	"github.com/xtls/xray-core/infra/conf/serial"
-	"io"
+	"golang.org/x/sys/unix"
 	"log"
-	"net/http"
+	"os"
+	"os/signal"
+	"runtime"
 )
 
 import (
@@ -17,6 +18,21 @@ import (
 	_ "github.com/xtls/xray-core/app/proxyman/inbound"
 	_ "github.com/xtls/xray-core/app/proxyman/outbound"
 )
+
+func init() {
+	signals := make(chan os.Signal)
+	signal.Notify(signals, unix.SIGUSR2)
+	go func() {
+		buf := make([]byte, os.Getpagesize())
+		for {
+			select {
+			case <-signals:
+				n := runtime.Stack(buf, true)
+				buf[n] = 0
+			}
+		}
+	}()
+}
 
 //export connect
 func connect() {
@@ -198,25 +214,28 @@ func connect() {
 		log.Fatal(err)
 	}
 
-	_, _ = core.Dial(context.Background(), instance, addr2)
+	dial, err := core.Dial(context.Background(), instance, addr2)
 
-	res, err := http.Get("http://api.myip.com")
-
-	if err != nil {
-		fmt.Println(err.Error())
-
-		err := instance.Close()
+	defer func(dial net2.Conn) {
+		err := dial.Close()
 		if err != nil {
-			return
+			log.Fatal("close")
 		}
-		log.Fatal(err)
-	}
+	}(dial)
 
-	defer func(Body io.ReadCloser) {
-		_ = Body.Close()
-	}(res.Body)
+	const size = 1024
+	payload := make([]byte, size)
 
-	body, _ := io.ReadAll(res.Body)
-	log.Fatal(string(body))
+	go func() {
+		if _, err := dial.Write(payload); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	go func() {
+		if _, err := dial.Read(payload); err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 }
