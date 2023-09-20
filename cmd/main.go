@@ -11,7 +11,8 @@ import (
 	"log"
 )
 
-func main() {
+//export connect
+func connect() {
 	configJson := `{
   "dns": {
     "disableFallback": true,
