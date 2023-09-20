@@ -1,41 +1,17 @@
 package main
 
-import "C"
-import (
-	net2 "github.com/xtls/xray-core/common/net"
-	"github.com/xtls/xray-core/core"
-	"github.com/xtls/xray-core/infra/conf/serial"
-	"golang.org/x/sys/unix"
-	"log"
-	"os"
-	"os/signal"
-	"runtime"
-)
-
 import (
 	"bytes"
 	"context"
 	_ "github.com/xtls/xray-core/app/proxyman/inbound"
 	_ "github.com/xtls/xray-core/app/proxyman/outbound"
+	net2 "github.com/xtls/xray-core/common/net"
+	"github.com/xtls/xray-core/core"
+	"github.com/xtls/xray-core/infra/conf/serial"
+	"log"
 )
 
-func init() {
-	signals := make(chan os.Signal)
-	signal.Notify(signals, unix.SIGUSR2)
-	go func() {
-		buf := make([]byte, os.Getpagesize())
-		for {
-			select {
-			case <-signals:
-				n := runtime.Stack(buf, true)
-				buf[n] = 0
-			}
-		}
-	}()
-}
-
-//export connect
-func connect() {
+func main() {
 	configJson := `{
   "dns": {
     "disableFallback": true,
@@ -119,7 +95,7 @@ func connect() {
         "realitySettings": {
           "fingerprint": "chrome",
           "publicKey": "TrzZNtAHerCUPK7A6OudkGE47P0spcOkRK6NO3w9gg8",
-          "serverName": "aws.amazon.com",
+          "serverName": "yahoo.com",
           "shortId": "b83c2e00576b253f",
           "spiderX": ""
         },
