@@ -1,6 +1,7 @@
 package main
 
 import (
+	"C"
 	"bytes"
 	"context"
 	_ "github.com/xtls/xray-core/app/proxyman/inbound"
@@ -11,8 +12,8 @@ import (
 	"log"
 )
 
-//export connect
-func connect() {
+//export connectXTLS
+func connectXTLS() {
 	configJson := `{
   "dns": {
     "disableFallback": true,
